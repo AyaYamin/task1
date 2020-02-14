@@ -1,0 +1,115 @@
+#######################################################################################################
+write cronjob to run script file (to monitor system performance statistics) every minute
+ using crontab -e command 
+     * * * * * sh  /root/scri.sh
+	 
+#######################################################################################################
+at script file
+
+find commands to collect disk usage ,disk free ,memory used and cpu utilization
+mpstat -P ALL
+       mpstat command is use to display CPU usage of each CPU individually.
+free -m
+       free command is used to display the amount of free and used system memory.
+df	   
+	   to get a full summary of available and used disk space usage of the file system on Linux system.
+
+store output of commands in seperate files 
+	  
+#######################################################################################################
+For Mem
+
+read the output of free -m that stored in the file (read from file)
+output as table 
+                     total        used        free      shared  buff/cache   available
+              Mem:    1970        1188         149           5         632         621
+              Swap:    947           0         946
+want for Mem just the cloumn used
+cat /root/MEM_U | grep -i "Mem" | tr -s ' ' | cut -d  ' ' -f 3
+                 search for "Mem" using grep
+                 squeeze multiple blank spaces to a single blank space using tr -s
+                 specify cloumn to get specified part of text (used value) using cut
+store the result value  in a file 
+
+each time read values from the file to use it to compute average
+cat /root/MEM_VALUE |awk ' {i++; sum+=$1; } END {print sum/i; }'
+         MEM_VALUE file  contains values as cloumn 
+		 collect values from  cloumn $1 (sum)
+		 each time increment counter
+		 the output is printing the division of sum on the count (average)
+store average on file
+       
+
+#######################################################################################################
+For CPU
+
+read the output of mpstat -P ALL that stored in the file (read from file)
+output
+               12:41:17 AM  CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest   %idle
+               12:41:18 AM  all    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00  100.00
+want for CPU just the cloumn %idle (free)
+cat /root/CPU_U | grep -i "all" | tr -s ' ' | cut -d  ' ' -f 13
+                 search for "all" using grep
+                 squeeze multiple blank spaces to a single blank space using tr -s
+                 specify cloumn to get specified part of text (used value) using cut
+store the result value  in a file 
+
+each time read values from the file to use it to compute average of free
+cat /root/CPU_VALUE | awk ' {i++; sum+=$1; } END { sum/i; sum=0;i=0}
+         CPU_VALUE file  contains values as cloumn 
+		 collect values from  cloumn $1 (sum)
+		 each time increment counter
+		 the output is printing the division of sum on the count (average)
+store average on file
+
+awk '{print (100.00-$13)'
+       compute  the value of used (not free)
+	   store in file
+	   read the value and compute average 
+	   store average in a file
+
+#######################################################################################################
+For Disk
+
+df | awk '{print $3}'|sed '1d'| awk '{sum+=$1;i++ } END {print sum/i}'
+             give only third cloumn (used)
+             remove "used" word from cloumn
+			 compute sum of used values from df output
+			 the output is printing the division of sum on the count (average)
+each time store the result value  in a file 
+then,read the values from the file and compute average for them
+
+df | awk '{print $4}'|sed '1d'| awk '{sum+=$1;i++ } END {print sum/i}'
+             give only fourth cloumn (available)
+             remove "available" word from cloumn
+			 compute sum of available values from df output
+			 the output is printing the division of sum on the count (average)
+each time store the result value  in a file 
+then,read the values from the file and compute average for them
+
+
+
+#######################################################################################################
+check if appache server is running
+at index.html make 5 links with href 
+             mem,cpu used,cpu free,disk free,disk used
+			 
+
+#######################################################################################################
+as a result,there are 5 files exist
+                one contains average values for memory
+				one contains average values for cpu idle
+				one contains average values for cpu used
+				one contains average values for disk used
+				one contains average values for disk free
+for each file,compute average for values and output average with timestamp on another files
+use the newer files with href links
+
+
+#######################################################################################################
+
+
+
+
+
+
