@@ -2,9 +2,13 @@
 write cronjob to run script file (to monitor system performance statistics) every minute
  using crontab -e command 
      * * * * * sh  /root/scri.sh
+
+write another  cronjob to run script file every 5 minutes (to take every 5 readable value and compute average for them)
+      */5 * * * * sh /root/avg.sh
+
 	 
 #######################################################################################################
-at script file
+at script file scri.sh
 
 find commands to collect disk usage ,disk free ,memory used and cpu utilization
 mpstat -P ALL
@@ -32,12 +36,14 @@ cat /root/MEM_U | grep -i "Mem" | tr -s ' ' | cut -d  ' ' -f 3
 store the result value  in a file 
 
 each time read values from the file to use it to compute average
-cat /root/MEM_VALUE |awk ' {i++; sum+=$1; } END {print sum/i; }'
+
+ at avg.sh
+     cat /root/MEM_VALUE |awk ' {i++; sum+=$1; } END {print sum/i; }'
          MEM_VALUE file  contains values as cloumn 
 		 collect values from  cloumn $1 (sum)
 		 each time increment counter
 		 the output is printing the division of sum on the count (average)
-store average on file
+     store average on file
        
 
 #######################################################################################################
@@ -54,19 +60,22 @@ cat /root/CPU_U | grep -i "all" | tr -s ' ' | cut -d  ' ' -f 13
                  specify cloumn to get specified part of text (used value) using cut
 store the result value  in a file 
 
-each time read values from the file to use it to compute average of free
-cat /root/CPU_VALUE | awk ' {i++; sum+=$1; } END { sum/i; sum=0;i=0}
+
+at avg.sh
+ each time read values from the file to use it to compute average of free
+ cat /root/CPU_VALUE | awk ' {i++; sum+=$1; } END { sum/i; sum=0;i=0}
          CPU_VALUE file  contains values as cloumn 
 		 collect values from  cloumn $1 (sum)
 		 each time increment counter
 		 the output is printing the division of sum on the count (average)
-store average on file
+  store average on file
 
 awk '{print (100.00-$13)'
        compute  the value of used (not free)
 	   store in file
-	   read the value and compute average 
-	   store average in a file
+	 at avg.sh
+	    read the value and compute average 
+	    store average in a file
 
 #######################################################################################################
 For Disk
@@ -76,16 +85,18 @@ df | awk '{print $3}'|sed '1d'| awk '{sum+=$1;i++ } END {print sum/i}'
              remove "used" word from cloumn
 			 compute sum of used values from df output
 			 the output is printing the division of sum on the count (average)
-each time store the result value  in a file 
-then,read the values from the file and compute average for them
+at avg.sh
+  each time store the result value  in a file 
+  then,read the values from the file and compute average for them
 
 df | awk '{print $4}'|sed '1d'| awk '{sum+=$1;i++ } END {print sum/i}'
              give only fourth cloumn (available)
              remove "available" word from cloumn
 			 compute sum of available values from df output
 			 the output is printing the division of sum on the count (average)
-each time store the result value  in a file 
-then,read the values from the file and compute average for them
+at avg.sh
+  each time store the result value  in a file 
+  then,read the values from the file and compute average for them
 
 
 
@@ -96,7 +107,8 @@ at index.html make 5 links with href
 			 
 
 #######################################################################################################
-as a result,there are 5 files exist
+at avg.sh
+ as a result,there are 5 files exist
                 one contains average values for memory
 				one contains average values for cpu idle
 				one contains average values for cpu used
